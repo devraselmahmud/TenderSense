@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tendersense}
+      POSTGRES_USER: ${POSTGRES_USER:-tendersense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tendersense} -d ${POSTGRES_DB:-tendersense}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:8
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping: 1}).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-tendersense}
+      POSTGRES_USER: ${POSTGRES_USER:-tendersense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      JWT_SECRET: ${JWT_SECRET:-replace-with-at-least-32-characters}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-replace-with-a-random-token}
+      PYTHON_SERVICE_URL: http://python-service:8000
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@bracits.net}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-now}
+    depends_on:
+      postgres: {condition: service_healthy}
+      python-service: {condition: service_started}
+    ports: ["8080:8080"]
+
+  python-service:
+    build: ./python-service
+    environment:
+      BACKEND_URL: http://backend:8080
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-replace-with-a-random-token}
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DATABASE: ${MONGO_DATABASE:-tendersense}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-}
+      ANTHROPIC_AUTH_TOKEN: ${ANTHROPIC_AUTH_TOKEN:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-USIS-COMBO}
+      API_TIMEOUT_MS: ${API_TIMEOUT_MS:-300000}
+    depends_on:
+      mongo: {condition: service_healthy}
+    expose: ["8000"]
+
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["4200:80"]
+
+volumes:
+  postgres-data:
+  mongo-data:

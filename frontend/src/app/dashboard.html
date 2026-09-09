@@ -1,0 +1,31 @@
+<main>
+  @if (error()) { <div class="notice">{{ error() }}</div> }
+  <section class="hero">
+    <div><p class="eyebrow">PROCUREMENT INTELLIGENCE</p><h1>Today’s profile matches</h1><p>S/A/B tenders published today that match the latest BracIT profile and pass or need eligibility verification.</p></div>
+    <button class="primary" (click)="loadTenders()" [disabled]="loading()">{{ loading() ? 'Refreshing…' : 'Refresh' }}</button>
+  </section>
+  <div class="layout">
+    <section class="card list">
+      <div class="list-head"><strong>{{ tenders().length }} profile-matched opportunities</strong><span>{{ loading() ? 'Loading…' : 'Live shortlist' }}</span></div>
+      <div class="tender-scroll">
+        @for (tender of tenders(); track tender.id) {
+          <button class="tender" [class.active]="selected()?.id === tender.id" (click)="open(tender)">
+            <div><span class="grade">{{ tender.grade || '—' }}</span><strong>{{ tender.title }}</strong></div>
+            <small>{{ tender.source }} · Published {{ tender.publishDate || 'date unavailable' }} · Due {{ tender.deadlineDate || 'date unavailable' }}</small>
+            <span class="status">{{ tender.eligibilityStatus || 'Needs profile' }}</span>
+          </button>
+        } @empty { <div class="empty">No current-profile S/A/B matches published today. Refresh after profile rescoring completes.</div> }
+      </div>
+    </section>
+    <section class="card detail">
+      @if (selected(); as tender) {
+        <p class="eyebrow">{{ tender.source }} · {{ tender.procuringEntity || 'Procuring entity unavailable' }}</p>
+        <h2>{{ tender.title }}</h2>
+        <p>{{ tender.summary || 'No summary available. Configure profile and run scoring.' }}</p>
+        <div class="facts"><div><small>Grade</small><strong>{{ tender.grade || '—' }}</strong></div><div><small>Eligibility</small><strong>{{ tender.eligibilityStatus || '—' }}</strong></div><div><small>Deadline</small><strong>{{ tender.deadlineDate || '—' }}</strong></div></div>
+        @if (tender.sourceUrl) { <a class="source-link" [href]="tender.sourceUrl" target="_blank" rel="noopener noreferrer">View original tender</a> }
+        <div class="decision"><h3>Decision</h3><select [(ngModel)]="decision" aria-label="Decision"><option>BID</option><option>HOLD</option><option>SKIP</option></select><textarea [(ngModel)]="decisionNote" placeholder="Optional note" aria-label="Decision note"></textarea><button class="primary" (click)="saveDecision()">Save decision</button></div>
+      } @else { <div class="empty">Select tender to inspect fit and record decision.</div> }
+    </section>
+  </div>
+</main>

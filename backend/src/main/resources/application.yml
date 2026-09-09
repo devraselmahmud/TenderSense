@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tendersense}
+    username: ${POSTGRES_USER:tendersense}
+    password: ${POSTGRES_PASSWORD:tendersense}
+  flyway:
+    enabled: true
+server:
+  port: 8080
+management:
+  endpoints.web.exposure.include: health,info
+app:
+  jwt-secret: ${JWT_SECRET:development-secret-change-before-production}
+  internal-token: ${INTERNAL_API_TOKEN:development-internal-token}
+  python-url: ${PYTHON_SERVICE_URL:http://localhost:8000}
+  admin-email: ${ADMIN_EMAIL:admin@bracits.net}
+  admin-password: ${ADMIN_PASSWORD:ChangeMe123!}

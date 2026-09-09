@@ -1,0 +1,40 @@
+<main>
+  <section class="hero"><div><p class="eyebrow">COMPANY CAPABILITIES</p><h1>BracIT profile</h1><p>Profile drives deterministic eligibility and semantic matching.</p></div></section>
+  @if (message()) { <div class="notice" [class.success]="message() === 'Profile saved'">{{ message() }}</div> }
+  <section class="card profile">
+    @if (loading()) {
+      <div class="empty">Loading profile…</div>
+    } @else {
+      <div class="form-grid"><label>Turnover<input type="number" [(ngModel)]="profile.turnoverAmount"></label><label>Currency<input [(ngModel)]="profile.currency"></label></div>
+
+      <h2>Services</h2>
+      @for (service of profile.services; track $index) { <div class="form-grid"><input [(ngModel)]="service.name" placeholder="Service name" aria-label="Service name"><input [(ngModel)]="service.description" placeholder="Description" aria-label="Service description"></div> }
+      <button class="ghost" (click)="addService()">+ Add service</button>
+
+      <h2>Past contracts</h2>
+      @for (project of profile.pastProjects; track $index) {
+        <div class="entry">
+          <div class="entry-head"><strong>Contract {{ $index + 1 }}</strong><button class="remove" (click)="removePastProject($index)">Remove</button></div>
+          <div class="form-grid"><label>Title<input [(ngModel)]="project.title" required></label><label>Client<input [(ngModel)]="project.client"></label></div>
+          <div class="form-grid"><label>Sector<input [(ngModel)]="project.sector"></label><label>Year<input type="number" [(ngModel)]="project.year"></label></div>
+          <label>Description<textarea [(ngModel)]="project.description" required></textarea></label>
+        </div>
+      } @empty { <p class="empty-section">No past contracts added.</p> }
+      <button class="ghost" (click)="addPastProject()">+ Add past contract</button>
+
+      <h2>Certifications</h2>
+      @for (certification of profile.certifications; track $index) {
+        <div class="entry">
+          <div class="entry-head"><strong>Certification {{ $index + 1 }}</strong><button class="remove" (click)="removeCertification($index)">Remove</button></div>
+          <div class="cert-grid"><label>Name<input [(ngModel)]="certification.name" required></label><label>Issuing body<input [(ngModel)]="certification.issuingBody"></label><label>Valid until<input type="date" [(ngModel)]="certification.validUntil"></label></div>
+        </div>
+      } @empty { <p class="empty-section">No certifications added.</p> }
+      <button class="ghost" (click)="addCertification()">+ Add certification</button>
+
+      <h2>Geographies</h2>
+      @for (geography of profile.geographies; track $index) { <input [(ngModel)]="profile.geographies[$index]" placeholder="Country or region" aria-label="Geography"> }
+      <button class="ghost" (click)="addGeography()">+ Add geography</button>
+      <button class="primary save" (click)="saveProfile()" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save profile' }}</button>
+    }
+  </section>
+</main>
