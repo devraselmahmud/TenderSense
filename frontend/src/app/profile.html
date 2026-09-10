@@ -8,8 +8,16 @@
       <div class="form-grid"><label>Turnover<input type="number" [(ngModel)]="profile.turnoverAmount"></label><label>Currency<input [(ngModel)]="profile.currency"></label></div>
 
       <h2>Services</h2>
-      @for (service of profile.services; track $index) { <div class="form-grid"><input [(ngModel)]="service.name" placeholder="Service name" aria-label="Service name"><input [(ngModel)]="service.description" placeholder="Description" aria-label="Service description"></div> }
-      <button class="ghost" (click)="addService()">+ Add service</button>
+      @for (service of profile.services; track $index) {
+        <div class="entry">
+          <div class="entry-head">
+            <strong>Service {{ $index + 1 }}</strong>
+            @if (profile.services.length > 1) { <button type="button" class="remove" [attr.aria-label]="'Remove service ' + ($index + 1)" (click)="removeService($index)">Remove</button> }
+          </div>
+          <div class="form-grid"><input [(ngModel)]="service.name" placeholder="Service name" aria-label="Service name"><input [(ngModel)]="service.description" placeholder="Description" aria-label="Service description"></div>
+        </div>
+      }
+      <button type="button" class="ghost" (click)="addService()">+ Add service</button>
 
       <h2>Past contracts</h2>
       @for (project of profile.pastProjects; track $index) {

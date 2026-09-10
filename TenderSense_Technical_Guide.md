@@ -91,7 +91,7 @@ Backend owns:
 Python service owns:
 
 - Source adapters and normalization
-- Daily scheduler
+- Hourly daytime scheduler
 - Raw payload persistence
 - Semantic embedding and nearest profile-segment matching
 - Embedding cache
@@ -101,7 +101,7 @@ Python service owns:
 
 Entry points:
 
-- Scheduled run at `04:00` in `Asia/Dhaka`
+- Scheduled hourly from `09:00` through `20:00` in `Asia/Dhaka`
 - `POST /ingestion/run`, protected by internal token
 - Backend admin proxy: `POST /api/admin/ingestion/run`
 

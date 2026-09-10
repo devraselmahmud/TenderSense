@@ -12,7 +12,7 @@ class Settings:
     anthropic_model: str = os.getenv("ANTHROPIC_MODEL", "USIS-COMBO")
     api_timeout: float = int(os.getenv("API_TIMEOUT_MS", "300000")) / 1000
     world_bank_url: str = os.getenv("WORLD_BANK_URL", "https://search.worldbank.org/api/v2/procnotices")
-    adb_url: str = os.getenv("ADB_URL", "https://www.adb.org/work-with-us/business-opportunities/institutional-procurement/notices")
+    adb_url: str = os.getenv("ADB_URL", "https://www.adb.org/business/institutional-procurement/notices")
     egp_search_url: str = os.getenv(
         "EGP_SEARCH_URL",
         "https://www.eprocure.gov.bd/resources/common/StdTenderSearch.jsp?h=t",

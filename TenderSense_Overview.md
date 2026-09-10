@@ -98,7 +98,7 @@ Saving decision creates history entry. It does not change tender source data, re
 ## 4. Daily Operating Flow
 
 ```text
-04:00 Asia/Dhaka
+09:00-20:00 hourly, Asia/Dhaka
         |
         v
 Collect World Bank, ADB, and Bangladesh e-GP notices
@@ -145,7 +145,7 @@ After profile save, dashboard can temporarily be empty while background rescorin
 |---|---|
 | Angular frontend | Login, profile editing, daily shortlist, tender details, decision entry |
 | Spring Boot backend | Authentication, authorization, profile versions, tender persistence, eligibility, grading, shortlist, decisions |
-| FastAPI service | Source ingestion, semantic embeddings, AI summary, daily scheduler |
+| FastAPI service | Source ingestion, semantic embeddings, AI summary, hourly daytime scheduler |
 | PostgreSQL | Structured operational records and business history |
 | MongoDB | Raw source payloads, scrape logs, embedding cache |
 | Docker Compose | Runs and connects all services |

@@ -61,6 +61,7 @@ export class Profile implements OnInit {
   }
 
   addService() { this.profile.services.push({ name: '', description: '' }); }
+  removeService(index: number) { if (this.profile.services.length > 1) this.profile.services.splice(index, 1); }
   addPastProject() { this.profile.pastProjects.push({ title: '', client: '', sector: '', year: null, description: '' }); }
   removePastProject(index: number) { this.profile.pastProjects.splice(index, 1); }
   addCertification() { this.profile.certifications.push({ name: '', issuingBody: '', validUntil: null }); }
