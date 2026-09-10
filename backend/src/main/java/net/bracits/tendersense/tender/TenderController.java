@@ -27,23 +27,34 @@ public class TenderController {
 
     @GetMapping
     List<Map<String, Object>> shortlist(@RequestParam(defaultValue = "false") boolean publishedToday) {
-        String dateFilter = publishedToday ? "AND t.publish_date = ?" : "";
+        String dateFilter = publishedToday ? "AND (t.publish_date = ? OR (t.source='UPLOAD' AND (t.ingested_at AT TIME ZONE 'Asia/Dhaka')::date=?))" : "";
         String sql = """
+            WITH ranked AS (
+              SELECT t.*,
+                ROW_NUMBER() OVER (
+                  PARTITION BY lower(trim(t.title)),lower(trim(coalesce(t.procuring_entity,''))),
+                    t.deadline_date,md5(trim(coalesce(t.description,'')))
+                  ORDER BY t.id
+                ) AS duplicate_rank
+              FROM tenders t
+              WHERE t.status='SCORED'
+                AND t.profile_version=(SELECT MAX(version) FROM bracit_profiles)
+                AND t.grade IN ('S','A','B')
+                AND t.eligibility_status IN ('ELIGIBLE','NEEDS_VERIFICATION')
+                AND t.estimated_value >= 100000
+                AND t.estimated_value_currency = 'BDT'
+                %s
+            )
             SELECT t.id,t.source,t.title,t.procuring_entity AS "procuringEntity",t.publish_date AS "publishDate",
               t.deadline_date AS "deadlineDate",t.grade,t.eligibility_status AS "eligibilityStatus",
               t.eligibility_reason AS "eligibilityReason",t.summary,t.status,
               (SELECT decision FROM bid_decisions d WHERE d.tender_id=t.id ORDER BY decided_at DESC LIMIT 1) AS decision
-            FROM tenders t
-            WHERE t.status='SCORED'
-              AND t.profile_version=(SELECT MAX(version) FROM bracit_profiles)
-              AND t.grade IN ('S','A','B')
-              AND t.eligibility_status IN ('ELIGIBLE','NEEDS_VERIFICATION')
-              %s
+            FROM ranked t
+            WHERE t.duplicate_rank=1
             ORDER BY CASE grade WHEN 'S' THEN 1 WHEN 'A' THEN 2 WHEN 'B' THEN 3 ELSE 4 END, deadline_date NULLS LAST
             """.formatted(dateFilter);
-        return publishedToday
-            ? jdbc.queryForList(sql, LocalDate.now(ZoneId.of("Asia/Dhaka")))
-            : jdbc.queryForList(sql);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Dhaka"));
+        return publishedToday ? jdbc.queryForList(sql, today, today) : jdbc.queryForList(sql);
     }
 
     @GetMapping("/{id}")

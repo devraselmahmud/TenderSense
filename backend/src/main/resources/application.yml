@@ -5,6 +5,10 @@ spring:
     password: ${POSTGRES_PASSWORD:tendersense}
   flyway:
     enabled: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
 server:
   port: 8080
 management:

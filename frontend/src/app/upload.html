@@ -1,0 +1,28 @@
+<main>
+  <section class="hero"><div><p class="eyebrow">EXTERNAL OPPORTUNITIES</p><h1>Upload tender list</h1><p>Import DOCX, XLSX, or selectable-text PDF files. TenderSense extracts and scores matching opportunities.</p></div></section>
+  <section class="card upload-card">
+    @if (error()) { <div class="notice error" role="alert">{{ error() }}</div> }
+    @if (result(); as imported) {
+      <div class="notice success" role="status">
+        <strong>Import complete</strong>
+        <span>{{ imported.importedCount }} tender{{ imported.importedCount === 1 ? '' : 's' }} imported; {{ imported.qualifyingCount }} matched current profile.</span>
+      </div>
+      @if (imported.warnings.length) {
+        <ul class="warnings">@for (warning of imported.warnings; track warning) { <li>{{ warning }}</li> }</ul>
+      }
+      <a class="primary action" routerLink="/">View dashboard</a>
+    }
+
+    <label class="picker" for="tender-file">
+      <strong>Choose tender document</strong>
+      <span>DOCX, XLSX, or selectable-text PDF · maximum 10 MiB</span>
+      <input id="tender-file" type="file" accept=".docx,.xlsx,.pdf" (change)="choose($event)" [disabled]="uploading()">
+    </label>
+
+    @if (selected(); as file) {
+      <div class="selected"><div><strong>{{ file.name }}</strong><span>{{ size(file) }}</span></div><button type="button" class="primary" (click)="upload()" [disabled]="uploading()">{{ uploading() ? 'Importing…' : 'Import and score' }}</button></div>
+      @if (uploading()) { <progress [value]="progress()" max="100" [attr.aria-label]="'Upload progress ' + progress() + '%'">{{ progress() }}%</progress> }
+    }
+    <p class="scan-note">Scanned or image-only PDFs need OCR and are not supported yet.</p>
+  </section>
+</main>

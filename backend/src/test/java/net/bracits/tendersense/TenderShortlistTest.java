@@ -22,24 +22,32 @@ class TenderShortlistTest {
     @Test
     void shortlistUsesLatestProfileAndExcludesLowOrIneligibleTenders() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.queryForList(anyString(), any(LocalDate.class))).thenReturn(List.of());
+        when(jdbc.queryForList(anyString(), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of());
 
         new TenderController(jdbc).shortlist(true);
 
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
-        verify(jdbc).queryForList(sql.capture(), any(LocalDate.class));
+        verify(jdbc).queryForList(sql.capture(), any(LocalDate.class), any(LocalDate.class));
         assertThat(sql.getValue())
+            .contains("ROW_NUMBER() OVER")
+            .contains("PARTITION BY lower(trim(t.title)),lower(trim(coalesce(t.procuring_entity,'')))")
+            .contains("t.deadline_date,md5(trim(coalesce(t.description,'')))")
+            .contains("t.duplicate_rank=1")
             .contains("t.status='SCORED'")
             .contains("t.profile_version=(SELECT MAX(version) FROM bracit_profiles)")
             .contains("t.grade IN ('S','A','B')")
             .contains("t.eligibility_status IN ('ELIGIBLE','NEEDS_VERIFICATION')")
-            .contains("t.publish_date = ?");
+            .contains("t.estimated_value >= 100000")
+            .contains("t.estimated_value_currency = 'BDT'")
+            .contains("t.publish_date = ?")
+            .contains("t.source='UPLOAD'")
+            .contains("t.ingested_at AT TIME ZONE 'Asia/Dhaka'");
     }
 
     @Test
     void todayBatchProcessesEveryStoredTender() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        when(jdbc.queryForList(anyString(), eq(Long.class), any(LocalDate.class))).thenReturn(List.of(3L, 7L));
+        when(jdbc.queryForList(anyString(), eq(Long.class), any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(3L, 7L));
         List<Long> processed = new ArrayList<>();
         TenderProcessingService service = new TenderProcessingService(
             jdbc,

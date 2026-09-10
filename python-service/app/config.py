@@ -11,6 +11,7 @@ class Settings:
     embedding_model: str = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
     anthropic_model: str = os.getenv("ANTHROPIC_MODEL", "USIS-COMBO")
     api_timeout: float = int(os.getenv("API_TIMEOUT_MS", "300000")) / 1000
+    upload_max_bytes: int = int(os.getenv("UPLOAD_MAX_BYTES", str(10 * 1024 * 1024)))
     world_bank_url: str = os.getenv("WORLD_BANK_URL", "https://search.worldbank.org/api/v2/procnotices")
     adb_url: str = os.getenv("ADB_URL", "https://www.adb.org/business/institutional-procurement/notices")
     egp_search_url: str = os.getenv(

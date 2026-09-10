@@ -40,8 +40,9 @@ public class TenderProcessingService {
     @Async
     public void processToday() {
         jdbc.queryForList(
-            "SELECT id FROM tenders WHERE publish_date=?",
+            "SELECT id FROM tenders WHERE publish_date=? OR (source='UPLOAD' AND (ingested_at AT TIME ZONE 'Asia/Dhaka')::date=?)",
             Long.class,
+            LocalDate.now(ZoneId.of("Asia/Dhaka")),
             LocalDate.now(ZoneId.of("Asia/Dhaka"))
         ).forEach(id -> {
             try {
