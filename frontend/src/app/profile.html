@@ -5,7 +5,8 @@
     @if (loading()) {
       <div class="empty">Loading profile…</div>
     } @else {
-      <div class="form-grid"><label>Turnover<input type="number" [(ngModel)]="profile.turnoverAmount"></label><label>Currency<input [(ngModel)]="profile.currency"></label></div>
+      <div class="form-grid"><label>Turnover<input type="number" min="0" [(ngModel)]="profile.turnoverAmount"></label><label>Currency<input [(ngModel)]="profile.currency"></label></div>
+      <label>Minimum tender budget (BDT)<input type="number" min="0" [(ngModel)]="profile.minimumTenderBudget"></label>
 
       <h2>Services</h2>
       @for (service of profile.services; track $index) {

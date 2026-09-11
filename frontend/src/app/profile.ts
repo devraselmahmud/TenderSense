@@ -9,6 +9,7 @@ interface ProfileData {
   configured?: boolean;
   turnoverAmount: number;
   currency: string;
+  minimumTenderBudget: number;
   services: ServiceLine[];
   pastProjects: PastProject[];
   certifications: Certification[];
@@ -39,6 +40,7 @@ export class Profile implements OnInit {
         if (value.configured) this.profile = {
           turnoverAmount: value.turnoverAmount,
           currency: value.currency,
+          minimumTenderBudget: value.minimumTenderBudget,
           services: value.services.length ? value.services : [{ name: '', description: '' }],
           pastProjects: value.pastProjects ?? [],
           certifications: value.certifications ?? [],
@@ -69,7 +71,7 @@ export class Profile implements OnInit {
   addGeography() { this.profile.geographies.push(''); }
 
   private emptyProfile(): ProfileData {
-    return { turnoverAmount: 0, currency: 'BDT', services: [{ name: '', description: '' }], pastProjects: [], certifications: [], geographies: [''] };
+    return { turnoverAmount: 0, currency: 'BDT', minimumTenderBudget: 100000, services: [{ name: '', description: '' }], pastProjects: [], certifications: [], geographies: [''] };
   }
 
   private headers() { return new HttpHeaders({ Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` }); }

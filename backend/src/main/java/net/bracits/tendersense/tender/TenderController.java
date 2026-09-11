@@ -41,7 +41,7 @@ public class TenderController {
                 AND t.profile_version=(SELECT MAX(version) FROM bracit_profiles)
                 AND t.grade IN ('S','A','B')
                 AND t.eligibility_status IN ('ELIGIBLE','NEEDS_VERIFICATION')
-                AND t.estimated_value >= 100000
+                AND t.estimated_value >= (SELECT minimum_tender_budget FROM bracit_profiles WHERE version=t.profile_version)
                 AND t.estimated_value_currency = 'BDT'
                 %s
             )

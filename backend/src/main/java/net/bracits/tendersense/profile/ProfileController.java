@@ -58,18 +58,19 @@ public class ProfileController {
         String certifications = json.writeValueAsString(request.certifications());
         jdbc.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("""
-                INSERT INTO bracit_profiles(version,turnover_amount,currency,services,past_projects,certifications,geographies,created_by)
-                VALUES (?,?,?,?::jsonb,?::jsonb,?::jsonb,?,?)
+                INSERT INTO bracit_profiles(version,turnover_amount,currency,minimum_tender_budget,services,past_projects,certifications,geographies,created_by)
+                VALUES (?,?,?,?,?::jsonb,?::jsonb,?::jsonb,?,?)
                 """, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, version);
             ps.setBigDecimal(2, request.turnoverAmount());
             ps.setString(3, request.currency().toUpperCase());
-            ps.setString(4, services);
-            ps.setString(5, projects);
-            ps.setString(6, certifications);
+            ps.setBigDecimal(4, request.minimumTenderBudget());
+            ps.setString(5, services);
+            ps.setString(6, projects);
+            ps.setString(7, certifications);
             Array geographies = connection.createArrayOf("text", request.geographies().toArray());
-            ps.setArray(7, geographies);
-            ps.setLong(8, userId);
+            ps.setArray(8, geographies);
+            ps.setLong(9, userId);
             return ps;
         });
         jdbc.update("UPDATE tenders SET status='NEW' WHERE deadline_date IS NULL OR deadline_date >= CURRENT_DATE");
@@ -82,6 +83,7 @@ public class ProfileController {
             return Map.ofEntries(
                 Map.entry("id", rs.getLong("id")), Map.entry("version", rs.getInt("version")),
                 Map.entry("turnoverAmount", rs.getBigDecimal("turnover_amount")), Map.entry("currency", rs.getString("currency")),
+                Map.entry("minimumTenderBudget", rs.getBigDecimal("minimum_tender_budget")),
                 Map.entry("services", json.readValue(rs.getString("services"), List.class)),
                 Map.entry("pastProjects", json.readValue(rs.getString("past_projects"), List.class)),
                 Map.entry("certifications", json.readValue(rs.getString("certifications"), List.class)),
@@ -94,7 +96,7 @@ public class ProfileController {
     public record PastProject(@NotBlank String title, String client, String sector, Integer year, @NotBlank String description) {}
     public record Certification(@NotBlank String name, String issuingBody, LocalDate validUntil) {}
     public record ProfileRequest(@NotNull @DecimalMin("0") BigDecimal turnoverAmount, @NotBlank String currency,
-        @NotEmpty List<ServiceLine> services, List<PastProject> pastProjects,
+        @NotNull @DecimalMin("0") BigDecimal minimumTenderBudget, @NotEmpty List<ServiceLine> services, List<PastProject> pastProjects,
         List<Certification> certifications, @NotEmpty List<String> geographies) {
         public ProfileRequest {
             pastProjects = pastProjects == null ? List.of() : pastProjects;

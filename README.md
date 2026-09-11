@@ -49,6 +49,10 @@ Application dependencies are declared in:
 
 Major runtime dependencies include Spring Boot, Spring Security, Flyway, PostgreSQL JDBC, FastAPI, Anthropic Python SDK, sentence-transformers, Beautiful Soup, openpyxl, python-docx, pypdf, PyMongo, Angular, and RxJS.
 
+## Deployment with Anthropic API
+
+See [`ANTHROPIC_DEPLOYMENT.md`](ANTHROPIC_DEPLOYMENT.md) for production-oriented Docker deployment, secure API-key configuration, verification, rotation, networking, backups, and troubleshooting.
+
 ## Quick start with Docker
 
 1. Create local environment file:
@@ -64,6 +68,7 @@ Major runtime dependencies include Spring Boot, Spring Security, Flyway, Postgre
    JWT_SECRET=replace-with-at-least-32-random-characters
    INTERNAL_API_TOKEN=replace-with-a-random-token
    ADMIN_PASSWORD=replace-this
+   ANTHROPIC_API_KEY=replace-with-anthropic-api-key
    ```
 
 3. Start and build all services:
@@ -121,9 +126,10 @@ Change these before shared or production-like use. Admin creation runs only when
 | `INTERNAL_API_TOKEN` | Development placeholder | Shared backend/FastAPI credential |
 | `ADMIN_EMAIL` | `admin@bracits.net` | Initial admin email |
 | `ADMIN_PASSWORD` | `change-me-now` | Initial admin password |
-| `ANTHROPIC_BASE_URL` | Empty | Claude-compatible Messages API base URL |
-| `ANTHROPIC_AUTH_TOKEN` | Empty | AI endpoint credential |
-| `ANTHROPIC_MODEL` | `USIS-COMBO` | Configured extraction/summary model |
+| `ANTHROPIC_API_KEY` | Empty | Direct Anthropic API credential |
+| `ANTHROPIC_BASE_URL` | Empty | Anthropic or Claude-compatible Messages API base URL |
+| `ANTHROPIC_AUTH_TOKEN` | Empty | Optional custom-gateway bearer credential; leave empty for direct Anthropic API |
+| `ANTHROPIC_MODEL` | `USIS-COMBO` | Extraction/summary model; direct Anthropic deployment overrides this |
 | `API_TIMEOUT_MS` | `300000` | External API timeout in milliseconds |
 
 Python also supports these environment variables when run directly:
@@ -215,6 +221,7 @@ JWT session lasts eight hours. **Sign out** removes browser token.
 Open **Profile** and enter:
 
 - **Turnover and currency**: Used by hard eligibility check against tender minimum turnover.
+- **Minimum tender budget (BDT)**: Hides tenders with known BDT estimates below configured amount. Existing profiles default to BDT 100,000.
 - **Services**: Name and description of each offered service.
 - **Past contracts**: Title and description provide evidence of relevant delivery experience.
 - **Certifications**: Name and validity date. Expired certifications do not pass eligibility.
@@ -333,12 +340,12 @@ Dashboard shows tender only when all conditions pass:
 - processing status is `SCORED`;
 - score grade is S, A, or B;
 - eligibility is `ELIGIBLE` or `NEEDS_VERIFICATION`;
-- tender estimated value is at least `BDT 100,000`;
+- tender estimated value meets latest profile's **Minimum tender budget (BDT)**;
 - estimated value currency is exactly BDT;
 - score uses latest profile version;
 - source tender was published today, or uploaded tender was imported today, in Asia/Dhaka time.
 
-Tenders are hidden when budget is missing, below BDT 100,000, or uses another currency. No currency conversion is performed. Hidden tenders remain stored.
+Tenders are hidden when budget is missing, below latest profile's BDT threshold, or uses another currency. No currency conversion is performed. Hidden tenders remain stored.
 
 Exact semantic duplicates are filtered from dashboard but retained in database because separate source IDs or URLs may represent distinct procurement packages.
 
@@ -404,7 +411,7 @@ Import succeeded, but no tender passed every dashboard condition. Check:
 
 - grade is S/A/B;
 - hard eligibility has no `FAIL`;
-- estimated value is at least BDT 100,000;
+- estimated value meets latest profile's minimum tender budget;
 - currency is BDT;
 - profile contains relevant services/contracts/certifications.
 

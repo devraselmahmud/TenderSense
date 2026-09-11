@@ -57,7 +57,7 @@ class TenderUploadControllerTest {
         assertThat(response.qualifyingCount()).isEqualTo(1);
         assertThat(response.tenderIds()).containsExactly(42L);
         verify(ingestion).upsert(any());
-        verify(jdbc).queryForObject(contains("estimated_value >= 100000"), eq(Boolean.class), eq(42L));
+        verify(jdbc).queryForObject(contains("minimum_tender_budget"), eq(Boolean.class), eq(42L));
         server.verify();
     }
 }

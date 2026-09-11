@@ -37,7 +37,7 @@ class TenderShortlistTest {
             .contains("t.profile_version=(SELECT MAX(version) FROM bracit_profiles)")
             .contains("t.grade IN ('S','A','B')")
             .contains("t.eligibility_status IN ('ELIGIBLE','NEEDS_VERIFICATION')")
-            .contains("t.estimated_value >= 100000")
+            .contains("t.estimated_value >= (SELECT minimum_tender_budget FROM bracit_profiles WHERE version=t.profile_version)")
             .contains("t.estimated_value_currency = 'BDT'")
             .contains("t.publish_date = ?")
             .contains("t.source='UPLOAD'")

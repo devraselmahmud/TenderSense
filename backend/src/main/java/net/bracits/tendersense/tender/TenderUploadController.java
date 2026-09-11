@@ -74,7 +74,8 @@ public class TenderUploadController {
         List<Long> qualifyingIds = tenderIds.stream().filter(id -> Boolean.TRUE.equals(jdbc.queryForObject("""
             SELECT status='SCORED' AND grade IN ('S','A','B')
               AND eligibility_status IN ('ELIGIBLE','NEEDS_VERIFICATION')
-              AND estimated_value >= 100000 AND estimated_value_currency='BDT' FROM tenders WHERE id=?
+              AND estimated_value >= (SELECT minimum_tender_budget FROM bracit_profiles WHERE version=tenders.profile_version)
+              AND estimated_value_currency='BDT' FROM tenders WHERE id=?
             """, Boolean.class, id))).toList();
         return new UploadResponse(extracted.uploadId(), extracted.fileHash(), tenderIds.size(), qualifyingIds.size(), tenderIds,
             qualifyingIds, extracted.warnings() == null ? List.of() : extracted.warnings());
