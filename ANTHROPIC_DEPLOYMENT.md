@@ -167,6 +167,61 @@ Required internal access:
 
 ## 7. Updates and safe restarts
 
+### Rebuild and push images from source
+
+After code changes, rebuild and push service images to Docker Hub using the helper script.
+
+Login:
+
+```bash
+make login
+```
+
+Push version tag:
+
+```bash
+make push-images TAG=1.0.2
+```
+
+Push current commit:
+
+```bash
+make tag-commit
+```
+
+Manual equivalent:
+
+```bash
+DOCKERHUB_USER=raselmahmudbits TAG=1.0.2 scripts/push-images.sh
+```
+
+Image naming convention:
+
+| Service | Image |
+|---|---|
+| Spring backend | `raselmahmudbits/tendersense-backend:<TAG>` |
+| Python service | `raselmahmudbits/tendersense-python-service:<TAG>` |
+| Angular frontend | `raselmahmudbits/tendersense-frontend:<TAG>` |
+
+Multi-arch build:
+
+```bash
+PLATFORMS=linux/amd64,linux/arm64 make push-images TAG=1.0.2
+```
+
+Script signature:
+
+```bash
+scripts/push-images.sh [TAG]
+```
+
+Environment variables:
+
+- `DOCKERHUB_USER` (default `raselmahmudbits`)
+- `TAG` (default `latest`)
+- `PLATFORMS` (default `linux/amd64`)
+- `PUSH=0` builds locally without pushing
+
 Pull and rebuild code:
 
 ```bash

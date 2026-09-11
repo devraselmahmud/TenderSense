@@ -53,6 +53,37 @@ Major runtime dependencies include Spring Boot, Spring Security, Flyway, Postgre
 
 See [`ANTHROPIC_DEPLOYMENT.md`](ANTHROPIC_DEPLOYMENT.md) for production-oriented Docker deployment, secure API-key configuration, verification, rotation, networking, backups, and troubleshooting.
 
+## Build and push Docker images
+
+After code changes, rebuild and push all three service images:
+
+```bash
+make login
+make push-images TAG=1.0.2
+```
+
+Push the current commit short SHA:
+
+```bash
+make tag-commit
+```
+
+Image naming:
+
+| Service | Image |
+|---|---|
+| Spring backend | `raselmahmudbits/tendersense-backend:<TAG>` |
+| Python service | `raselmahmudbits/tendersense-python-service:<TAG>` |
+| Angular frontend | `raselmahmudbits/tendersense-frontend:<TAG>` |
+
+Script signature:
+
+```bash
+scripts/push-images.sh [TAG]
+```
+
+Environment variables: `DOCKERHUB_USER`, `TAG`, `PLATFORMS`, `PUSH`.
+
 ## Quick start with Docker
 
 1. Create local environment file:
