@@ -49,9 +49,10 @@ Application dependencies are declared in:
 
 Major runtime dependencies include Spring Boot, Spring Security, Flyway, PostgreSQL JDBC, FastAPI, Anthropic Python SDK, sentence-transformers, Beautiful Soup, openpyxl, python-docx, pypdf, PyMongo, Angular, and RxJS.
 
-## Deployment with Anthropic API
+## Deployment guides
 
-See [`ANTHROPIC_DEPLOYMENT.md`](ANTHROPIC_DEPLOYMENT.md) for production-oriented Docker deployment, secure API-key configuration, verification, rotation, networking, backups, and troubleshooting.
+- [`DOCKER_RUNTIME_DEPLOYMENT.md`](DOCKER_RUNTIME_DEPLOYMENT.md): run all five services from Docker images with runtime environment variables or external databases.
+- [`ANTHROPIC_DEPLOYMENT.md`](ANTHROPIC_DEPLOYMENT.md): configure direct Anthropic API authentication, verification, rotation, networking, backups, and troubleshooting.
 
 ## Build and push Docker images
 

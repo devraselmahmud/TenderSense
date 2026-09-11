@@ -1,5 +1,6 @@
 .claude/
 .env
+.env.prod
 **/target/
 **/node_modules/
 **/dist/
