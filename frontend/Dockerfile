@@ -6,6 +6,7 @@ COPY . .
 RUN npm run build
 
 FROM nginx:alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN apk add --no-cache gettext
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /src/dist/frontend/browser /usr/share/nginx/html
 EXPOSE 80

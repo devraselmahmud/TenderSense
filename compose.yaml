@@ -56,6 +56,8 @@ services:
   frontend:
     build: ./frontend
     depends_on: [backend]
+    environment:
+      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM:-backend:8080}
     ports: ["4200:80"]
 
 volumes:
