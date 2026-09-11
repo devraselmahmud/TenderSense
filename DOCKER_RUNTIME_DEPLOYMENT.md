@@ -4,7 +4,7 @@ This guide runs frontend, backend, Python service, PostgreSQL, and MongoDB from 
 
 ## 1. Files required on deployment server
 
-Create one directory containing:
+Copy checked-in `compose.prod.yaml` to deployment server and create private runtime file beside it:
 
 ```text
 compose.prod.yaml
@@ -68,84 +68,14 @@ chmod 600 .env.prod
 
 `ADMIN_PASSWORD` creates initial admin only when `ADMIN_EMAIL` does not exist. Changing it later does not update existing account.
 
-## 3. Create `compose.prod.yaml`
+## 3. Production Compose
 
-```yaml
-services:
-  postgres:
-    image: raselmahmudbits/postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+Repository includes authoritative `compose.prod.yaml`. It defines all five services, Docker Hub images, health checks, restart policy, runtime variables, and persistent PostgreSQL/MongoDB volumes.
 
-  mongo:
-    image: raselmahmudbits/mongo:8
-    restart: unless-stopped
-    volumes:
-      - mongo-data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping: 1}).ok"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+Inspect changes without rendering secret values:
 
-  python-service:
-    image: raselmahmudbits/tendersense-python-service:${IMAGE_TAG}
-    restart: unless-stopped
-    environment:
-      BACKEND_URL: ${BACKEND_URL}
-      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
-      MONGO_URL: ${MONGO_URL}
-      MONGO_DATABASE: ${MONGO_DATABASE}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL}
-      ANTHROPIC_AUTH_TOKEN: ${ANTHROPIC_AUTH_TOKEN}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL}
-      API_TIMEOUT_MS: ${API_TIMEOUT_MS}
-    depends_on:
-      mongo:
-        condition: service_healthy
-
-  backend:
-    image: raselmahmudbits/tendersense-backend:${IMAGE_TAG}
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
-      PYTHON_SERVICE_URL: ${PYTHON_SERVICE_URL}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      python-service:
-        condition: service_started
-
-  frontend:
-    image: raselmahmudbits/tendersense-frontend:${IMAGE_TAG}
-    restart: unless-stopped
-    environment:
-      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM}
-    ports:
-      - "${FRONTEND_PORT}:80"
-    depends_on:
-      - backend
-
-volumes:
-  postgres-data:
-  mongo-data:
+```bash
+git diff -- compose.prod.yaml
 ```
 
 ## 4. Validate, pull, and start

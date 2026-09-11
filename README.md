@@ -51,7 +51,7 @@ Major runtime dependencies include Spring Boot, Spring Security, Flyway, Postgre
 
 ## Deployment guides
 
-- [`DOCKER_RUNTIME_DEPLOYMENT.md`](DOCKER_RUNTIME_DEPLOYMENT.md): run all five services from Docker images with runtime environment variables or external databases.
+- [`DOCKER_RUNTIME_DEPLOYMENT.md`](DOCKER_RUNTIME_DEPLOYMENT.md): deploy checked-in `compose.prod.yaml` with runtime environment variables or external databases.
 - [`ANTHROPIC_DEPLOYMENT.md`](ANTHROPIC_DEPLOYMENT.md): configure direct Anthropic API authentication, verification, rotation, networking, backups, and troubleshooting.
 
 ## Build and push Docker images

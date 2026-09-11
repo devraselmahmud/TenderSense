@@ -1,0 +1,82 @@
+name: tendersense
+
+services:
+  postgres:
+    image: raselmahmudbits/postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tendersense}
+      POSTGRES_USER: ${POSTGRES_USER:-tendersense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tendersense} -d ${POSTGRES_DB:-tendersense}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: raselmahmudbits/mongo:8
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping: 1}).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  python-service:
+    image: raselmahmudbits/tendersense-python-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: ${BACKEND_URL:-http://backend:8080}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-replace-with-a-random-token}
+      MONGO_URL: ${MONGO_URL:-mongodb://mongo:27017}
+      MONGO_DATABASE: ${MONGO_DATABASE:-tendersense}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_BASE_URL: ${ANTHROPIC_BASE_URL:-}
+      ANTHROPIC_AUTH_TOKEN: ${ANTHROPIC_AUTH_TOKEN:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-USIS-COMBO}
+      API_TIMEOUT_MS: ${API_TIMEOUT_MS:-300000}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      WORLD_BANK_URL: ${WORLD_BANK_URL:-https://search.worldbank.org/api/v2/procnotices}
+      ADB_URL: ${ADB_URL:-https://www.adb.org/business/institutional-procurement/notices}
+      EGP_SEARCH_URL: ${EGP_SEARCH_URL:-https://www.eprocure.gov.bd/resources/common/StdTenderSearch.jsp?h=t}
+      UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-10485760}
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  backend:
+    image: raselmahmudbits/tendersense-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/tendersense}
+      POSTGRES_USER: ${POSTGRES_USER:-tendersense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      JWT_SECRET: ${JWT_SECRET:-replace-with-at-least-32-characters}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-replace-with-a-random-token}
+      PYTHON_SERVICE_URL: ${PYTHON_SERVICE_URL:-http://python-service:8000}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@bracits.net}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-now}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      python-service:
+        condition: service_started
+
+  frontend:
+    image: raselmahmudbits/tendersense-frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      BACKEND_UPSTREAM: ${BACKEND_UPSTREAM:-backend:8080}
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:
+  mongo-data:
